@@ -50,6 +50,7 @@ router.get('/:id', async (req, res, next) => {
 
     try {
         // Your code here
+        tree = await Tree.findByPk(req.params.id);
 
         if (tree) {
             res.json(tree);
@@ -86,11 +87,21 @@ router.get('/:id', async (req, res, next) => {
  *     - Value: object (the new tree)
  */
 router.post('/', async (req, res, next) => {
+    const {name, location, height, size} = req.body
     try {
+        const newTree = await Tree.create({
+            tree: name,
+            location,
+            heightFt: height,
+            groundCircumferenceFt: size
+        },
+        );
         res.json({
             status: "success",
             message: "Successfully created new tree",
-        });
+            newTree
+        },
+        );
     } catch(err) {
         next({
             status: "error",
@@ -122,6 +133,11 @@ router.post('/', async (req, res, next) => {
  */
 router.delete('/:id', async (req, res, next) => {
     try {
+        const tree = await Tree.findByPk(req.params.id)
+        tree.destroy() 
+        if(!tree) {
+            next()
+        }
         res.json({
             status: "success",
             message: `Successfully removed tree ${req.params.id}`,
@@ -172,6 +188,20 @@ router.delete('/:id', async (req, res, next) => {
 router.put('/:id', async (req, res, next) => {
     try {
         // Your code here
+        const {id, name, location, height, size} = req.body;
+        const tree = await Tree.findByPk(req.params.id);
+
+        await tree.update({
+            tree: name,
+            location,
+            heightFt: height,
+            groundCircumferenceFt: size
+        }),
+        res.json({
+            tree,
+            status: 'Success',
+            message: 'Successfully updated tree'
+        })
     } catch(err) {
         next({
             status: "error",
